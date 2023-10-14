@@ -7,52 +7,85 @@
     <div class="row">
       <div class="col">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="github username">
+          <input v-model="username" type="text" class="form-control"
+          placeholder="github username">
         </div>
       </div>
 
       <div class="col">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="github repositório">
+          <input v-model="repository" type="text" class="form-control"
+          placeholder="github repositório">
         </div>
       </div>
 
       <div class="col-3">
         <div class="form-group">
-          <button class="btn btn-success">Go</button>
-          <button class="btn btn-danger">LIMPAR</button>
+          <button @click.prevent.stop="getIssues()" class="btn btn-success">Go</button>
+
+          <button @click.prevent.stop="reset()" class="btn btn-danger">LIMPAR</button>
         </div>
       </div>
 
     </div>
 
-    <br><hr><br>
+    <br>
+    <hr><br>
 
-  <table class="table table-sm table-bordered">
-    <thead>
-      <tr>
-        <th width="100">Número</th>
-        <th>Título</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="text-center" colspan="2">Nenhum issues encontrado!</td>
-      </tr>
-    </tbody>
-  </table>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th width="100">Número</th>
+          <th>Título</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-if="!!issues.length"
+          v-for="issue in issues"
+          :key="issue.number">
+          <td>{{issue.number}}</td>
+          <td>{{issue.title}}</td>
+        </tr>
+        <tr v-if="!!!issues.length">
+          <td class="text-center" colspan="2">Nenhum issues encontrado!</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script>
+// eslint-disable-next-line import/no-extraneous-dependencies
+import axios from 'axios';
+
 export default {
   name: 'GitHubIssues',
   data() {
     return {
-
+      username: '',
+      repository: '',
+      issues: [],
     };
   },
+
+  methods: {
+    reset() {
+      this.username = '';
+      this.repository = '';
+    },
+
+    getIssues() {
+      if (this.username && this.repository) {
+        const url = `https://api.github.com/repos/${this.username}/${this.repository}/issues`;
+        axios.get(url).then((response) => {
+          this.issues = response.data;
+        });
+      }
+    },
+  },
 };
+
 </script>
 
 <style></style>
